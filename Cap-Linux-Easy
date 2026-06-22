@@ -1,0 +1,53 @@
+Task 1: How many TCP ports are open?
+  The way I solved this was by performing a generic nmap scan. I didn't add any flags or anything special:
+    nmap <target_ip>
+  Once I recieved the nmap output, I was able to give the accurate count of tcp ports marked as open.
+
+Task 2: After running a "Security Snapshot", the browser is redirected to a path of the format /[something]/[id], where [id] represents the id number of the scan. What is the [something]?
+  I solved this by navigating to the <target_ip>, analyzing and navigating the webpage, and determining there was a tab specifically for Security Snapshot.
+    firefox <target_ip>
+
+Task 3: Are you able to get to other users' scans?
+  I had a little trouble with this one, but that was an issue due to me not entirely interpretting the data I was seeing. On the page where the snapshots are, the url shows something
+  that appears generic (a number). Without using any tools, I just changed the number to see what would happen which returned different results.
+
+Task 4: What is the ID of the PCAP file that contains sensative data?
+  Nothing special was performed to solve this, I just downloaded the PCAP files from each ID, followed streams using Wireshark, and found the .pcap that contained sensative data.
+
+Task 5: Which application layer protocol in the pcap file can the sensetive data be found in?
+  In order to solve this easily, a person would need to know the 7 OSI layers (Physical, Data link, Network, Transport, Session, Presentation, and Application) and which protocols
+  would be utilized in each layer. When analyzing the .pcap file from 0 in wireshark, I noticed TCP, HTTP, and FTP protocols being used. Understanding the OSI layer, I knew the
+  protocols I wanted to look into were HTTP and FTP (application layer protocols) since TCP is used at layer 4. I was able to find a password and username being transmitted using
+  the insecure FTP protocol.
+    Wireshark --> Open --> 0.pcap
+      Select packet # 31 --> right click --> Follow --> TCP Stream
+        
+
+Task 6: We've managed to collect nathan's FTP password. On what other service does this password work?
+  This was obvious from the nmap scan performed earlier, the services available were HTTP, SSH, and FTP.
+
+Task 7: Submit the flag located in the nathan user's home directory.
+  In order to accomplish this, I needed to connect to the machine via SSH (ssh <target_username>@<target_ip>) and enter the useername and password found while utilizing wireshark.
+  Once logged in, list the contents, cat the appropriate file, and discover the flag.
+    ssh <target_username>@<target_ip>
+      ls
+        cat <filename>.txt
+
+Task 8: What is the full path to the binary on this machine has special capabilities that can be abused to obtain root privileges?
+  This was a bit challenging (not really) due to not knowing which tools to use (I wasn't familiar with them). I utilized getcap in order to figure out which binary fit.
+    getcap -r / 2>/dev/null
+  I used "2>/dev/null" just in case I needed to ignore the permissions denied output (which is a lot when working with the root folder and using recursive flags). The output
+  generated showed aproximately 4 binaries along with their capabilities. I selected the one that set user IDs because if it has that capability, anyone can set themselves to root.
+
+Task 9: Submit the flag located in root's home directory.
+  I solved this one by running the script located in /usr/bin/ which was ./python3.8 which dropped me into a python interpreter. Once inside the interpreter, I imported os, verified
+  it worked by displaying the current user ID, set the user ID to root, and then dropped into a shell as root. 
+    ./python3.8
+      import os
+        os.getuid()
+          os.setuid(0)
+            os.system("/bin/bash")
+  Once there I was able to navigate to the root's home directory and find the flag
+    whoami
+      cd root
+        cat <filename>.txt
