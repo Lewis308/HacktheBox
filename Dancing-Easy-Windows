@@ -1,0 +1,32 @@
+Task 1: What does the 3-letter acronym SMB stand for?
+  Server Message block
+
+Task 2: What port does SMB use to operate at?
+  445
+
+Task 3: What is the service name for port 445 that came up in our Nmap scan?
+  microsoft-ds
+
+Task 4: What is the 'flag' or 'switch' that we can use with the smbclient utility to 'list' the available SMB shares on Dancing?
+  We can find out information such as this by using help or man pages.
+    smbclient -?
+      man smbclient
+These point to this final command
+    smbclient -L <target_IP>
+
+Task 5: How many shares are there on Dancing?
+  Using the command smbclient, we enumerate the shares.
+    smbclient -L <target_IP>
+
+Task 6: What is the name of the share we are able to access in the end with a blank password?
+    In order to figure this out, we connect to the shares and see which one we can authenticate to without a password/look at the $ before the name
+      smbclient //<target_ip>/<Share_Name> -N
+
+Task 7: What is the command we can use within the SMB shell to download the files we find?
+  Same command used to download files from FTP servers 
+    help
+      help <command>
+        get <file_name>
+          exit
+  Now read the file on current machine:
+    cat <extracted_file>
